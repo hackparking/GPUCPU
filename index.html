@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU/GPU ストレステスト</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            z-index: 100;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .warning {
+            color: #ff4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <canvas id="gpuCanvas"></canvas>
+        
+        <div class="info-panel">
+            <h2>CPU/GPU ストレステスト</h2>
+            <p><span id="cpuInfo">CPU負荷計算中...</span></p>
+            <p><span id="gpuInfo">GPU負荷計算中...</span></p>
+            <p class="warning">注意: このページはデバイスに高い負荷をかけます!</p>
+        </div>
+        
+        <div class="controls">
+            <button id="toggleCpu">CPU負荷: ON</button>
+            <button id="toggleGpu">GPU負荷: ON</button>
+        </div>
+    </div>
+
+    <script>
+        let cpuLoadActive = false;
+        let gpuLoadActive = false;
+        const cpuInfo = document.getElementById('cpuInfo');
+        const gpuInfo = document.getElementById('gpuInfo');
+        const canvas = document.getElementById('gpuCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function cpuLoad() {
+            while (cpuLoadActive) {
+                // 複雑な計算を行う
+                let x = 0;
+                for (let i = 0; i < 1e7; i++) {
+                    x += Math.sqrt(i) * Math.sin(i);
+                }
+                cpuInfo.textContent = `CPU負荷: ${x}`;
+            }
+        }
+
+        function gpuLoad() {
+            let angle = 0;
+            function draw() {
+                if (gpuLoadActive) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'rgba(0, 150, 255, 0.5)';
+                    for (let i = 0; i < 100; i++) {
+                        ctx.beginPath();
+                        ctx.arc(
+                            canvas.width / 2 + Math.cos(angle + i) * 200,
+                            canvas.height / 2 + Math.sin(angle + i) * 200,
+                            20,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                    angle += 0.05;
+                    requestAnimationFrame(draw);
+                }
+            }
+            draw();
+        }
+
+        document.getElementById('toggleCpu').addEventListener('click', () => {
+            cpuLoadActive = !cpuLoadActive;
+            document.getElementById('toggleCpu').textContent = cpuLoadActive ? 'CPU負荷: OFF' : 'CPU負荷: ON';
+            if (cpuLoadActive) {
+                cpuLoad();
+            }
+        });
+
+        document.getElementById('toggleGpu').addEventListener('click', () => {
+            gpuLoadActive = !gpuLoadActive;
+            document.getElementById('toggleGpu').textContent = gpuLoadActive ? 'GPU負荷: OFF' : 'GPU負荷: ON';
+            if (gpuLoadActive) {
+                gpuLoad();
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        });
+    </script>
+</body>
+</html>
